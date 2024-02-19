@@ -4,41 +4,87 @@ See assignment-01.pdf for details.
 """
 # no imports needed.
 
+
 def foo(x):
-    ### TODO
-    pass
+  if x <= 1:
+    return x
+  else:
+    ra = foo(x - 1)
+    rb = foo(x - 2)
+    return ra + rb
+
 
 def longest_run(mylist, key):
-    ### TODO
-    pass
+  longest_length = 0
+  current_length = 0
+
+  for i in range(len(mylist)):
+    if mylist[i] == key:
+      current_length += 1
+    else:
+      if current_length > longest_length:
+        longest_length = current_length
+      current_length = 0
+
+  if current_length > longest_length:
+    longest_length = current_length
+
+  return longest_length
 
 
 class Result:
-    """ done """
-    def __init__(self, left_size, right_size, longest_size, is_entire_range):
-        self.left_size = left_size               # run on left side of input
-        self.right_size = right_size             # run on right side of input
-        self.longest_size = longest_size         # longest run in input
-        self.is_entire_range = is_entire_range   # True if the entire input matches the key
-        
-    def __repr__(self):
-        return('longest_size=%d left_size=%d right_size=%d is_entire_range=%s' %
-              (self.longest_size, self.left_size, self.right_size, self.is_entire_range))
-    
+  """ done """
+
+  def __init__(self, left_size, right_size, longest_size, is_entire_range):
+    self.left_size = left_size  # run on left side of input
+    self.right_size = right_size  # run on right side of input
+    self.longest_size = longest_size  # longest run in input
+    self.is_entire_range = is_entire_range  # True if the entire input matches the key
+
+  def __repr__(self):
+    return ('longest_size=%d left_size=%d right_size=%d is_entire_range=%s' %
+            (self.longest_size, self.left_size, self.right_size,
+             self.is_entire_range))
+
 
 def to_value(v):
-    """
+  """
     if it is a Result object, return longest_size.
     else return v
     """
-    if type(v) == Result:
-        return v.longest_size
-    else:
-        return int(v)
-        
+  if type(v) == Result:
+    return v.longest_size
+  else:
+    return int(v)
+
+
 def longest_run_recursive(mylist, key):
-    ### TODO
-    pass
+  if len(mylist) == 0:
+    return Result(0, 0, 0, True)
+  elif len(mylist) == 1:
+    if mylist[0] == key:
+      return Result(1, 1, 1, True)
+    else:
+      return Result(0, 0, 0, False)
 
+  middle = len(mylist) // 2
+  left = longest_run_recursive(mylist[:middle], key)
+  right = longest_run_recursive(mylist[middle:], key)
 
+  is_entire_range = left.is_entire_range and right.is_entire_range
+  left_size = left.left_size if left.is_entire_range else left.left_size
+  right_size = right.right_size if right.is_entire_range else right.right_size
 
+  if mylist[middle - 1] == key and mylist[middle] == key:
+    halved_run = left.right_size + right.left_size
+  else:
+    halved_run = 0
+
+  if left.is_entire_range:
+    left_size += right.left_size
+  if right.is_entire_range:
+    right_size += left.right_size
+
+  longest_run = max(left.longest_size, right.longest_size, halved_run)
+
+  return Result(left_size, right_size, longest_run, is_entire_range)
